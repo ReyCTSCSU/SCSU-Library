@@ -7,7 +7,9 @@ $user_id = $_SESSION['user_id'];
 $user_name = $_SESSION['full_name'];
 $role = $_SESSION['role'];
 
+// ===============================
 // ✅ STUDENT DASHBOARD STATS
+// ===============================
 if (isStudent()) {
 
     $stmt = $conn->prepare(
@@ -49,7 +51,9 @@ if (isStudent()) {
     $stmt->close();
 }
 
+// ===============================
 // ✅ LIBRARIAN DASHBOARD STATS
+// ===============================
 if (isLibrarian()) {
 
     $total_books = $conn->query(
@@ -64,9 +68,10 @@ if (isLibrarian()) {
         "SELECT COUNT(*) AS total FROM Books WHERE quantity_available = 0"
     )->fetch_assoc()['total'];
 
+    // ✅ FIXED: uses created_at instead of timestamp
     $recent_activity = $conn->query(
-        "SELECT action, timestamp FROM Activity_Log 
-         ORDER BY timestamp DESC LIMIT 5"
+        "SELECT action, created_at FROM Activity_Log 
+         ORDER BY created_at DESC LIMIT 5"
     );
 }
 
@@ -169,18 +174,20 @@ closeDBConnection($conn);
 
             <div class="card">
                 <h3>🧾 Recent Activity</h3>
+
                 <?php if ($recent_activity->num_rows > 0): ?>
                     <ul class="activity-list">
                         <?php while ($row = $recent_activity->fetch_assoc()): ?>
                             <li>
                                 <strong><?php echo htmlspecialchars($row['action']); ?></strong>
-                                <small><?php echo date("M j, g:i A", strtotime($row['timestamp'])); ?></small>
+                                <small><?php echo date("M j, g:i A", strtotime($row['created_at'])); ?></small>
                             </li>
                         <?php endwhile; ?>
                     </ul>
                 <?php else: ?>
                     <p>No recent activity.</p>
                 <?php endif; ?>
+
             </div>
 
         <?php endif; ?>
